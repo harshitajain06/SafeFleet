@@ -5,6 +5,9 @@ import { auth } from '../../config/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase'; // make sure `db` is exported from firebase.js
+
 
 const RegisterScreen = () => {
   const [user, loading, error] = useAuthState(auth);
@@ -21,50 +24,59 @@ const RegisterScreen = () => {
   }, [user]);
 
   const handleSignUp = async () => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-      // Send email verification
-      await sendEmailVerification(user);
+    // Store user data in Firestore with default role 'user'
+    await setDoc(doc(db, 'users', user.uid), {
+      name: name,
+      email: email,
+      role: 'user', // ✅ default role assignment
+      createdAt: new Date(),
+    });
 
-      Alert.alert('Success', 'Account created successfully! Please verify your email.');
+    // Send email verification
+    await sendEmailVerification(user);
 
-      Toast.show({
-        type: 'success',
-        text1: 'Account created successfully!',
-        text2: 'Please verify your email.',
-      });
+    Alert.alert('Success', 'Account created successfully! Please verify your email.');
 
-      navigation.navigate('Login');
-    } catch (error) {
-      let errorMessage;
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errorMessage = 'The email address is already in use by another account.';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'The email address is not valid.';
-          break;
-        case 'auth/operation-not-allowed':
-          errorMessage = 'Email/password accounts are not enabled. Please contact support.';
-          break;
-        case 'auth/weak-password':
-          errorMessage = 'The password is too weak.';
-          break;
-        default:
-          errorMessage = 'An unknown error occurred. Please try again later.';
-      }
+    Toast.show({
+      type: 'success',
+      text1: 'Account created!',
+      text2: 'Please verify your email.',
+    });
 
-      Alert.alert('Error', errorMessage);
-
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: errorMessage,
-      });
+    navigation.navigate('Login');
+  } catch (error) {
+    let errorMessage;
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        errorMessage = 'The email address is already in use.';
+        break;
+      case 'auth/invalid-email':
+        errorMessage = 'Invalid email address.';
+        break;
+      case 'auth/operation-not-allowed':
+        errorMessage = 'Email/password signup is not enabled.';
+        break;
+      case 'auth/weak-password':
+        errorMessage = 'Password is too weak.';
+        break;
+      default:
+        errorMessage = 'An error occurred. Please try again.';
     }
-  };
+
+    Alert.alert('Error', errorMessage);
+
+    Toast.show({
+      type: 'error',
+      text1: 'Registration Failed',
+      text2: errorMessage,
+    });
+  }
+};
+
 
   return (
     <View style={styles.container}>

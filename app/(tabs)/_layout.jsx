@@ -2,16 +2,25 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { signOut } from 'firebase/auth';
+
 import HomePage from './Home';
-import InformationPage from './Information'
+import InformationPage from './Information';
 import RegisterScreen from './Register';
 import Login from './index';
+
+import AdminVehicleListScreen from './AdminVehicleListScreen';
+import DriverFormScreen from './DriverFormScreen';
+import VehicleTrackingScreen from './VehicleTrackingScreen';
+
 import { Colors } from '../../constants/Colors';
 import { useColorScheme } from '../../hooks/useColorScheme';
-import { Ionicons } from '@expo/vector-icons';
-import { signOut } from 'firebase/auth';
 import { auth } from '../../config/firebase';
-import { useNavigation } from '@react-navigation/native';
+import { useUserRole } from '../../hooks/useUserRole';
+import RoleGuard from '../../components/RoleGuard';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -19,6 +28,9 @@ const Drawer = createDrawerNavigator();
 
 const BottomTabs = () => {
   const colorScheme = useColorScheme();
+  const { role, loading } = useUserRole();
+
+  if (loading) return null;
 
   return (
     <Tab.Navigator
@@ -33,13 +45,48 @@ const BottomTabs = () => {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Information') {
             iconName = focused ? 'car' : 'car-outline';
-          } 
+          } else if (route.name === 'Admin List') {
+            iconName = focused ? 'list' : 'list-outline';
+          } else if (route.name === 'Track Vehicles') {
+            iconName = focused ? 'locate' : 'locate-outline';
+          } else if (route.name === 'Fill Form') {
+            iconName = focused ? 'create' : 'create-outline';
+          }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
     >
       <Tab.Screen name="Home" component={HomePage} />
       <Tab.Screen name="Information" component={InformationPage} />
+
+      {role === 'admin' && (
+        <>
+          <Tab.Screen name="Admin List">
+            {() => (
+              <RoleGuard allowedRoles={['admin']}>
+                <AdminVehicleListScreen />
+              </RoleGuard>
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Track Vehicles">
+            {() => (
+              <RoleGuard allowedRoles={['admin']}>
+                <VehicleTrackingScreen />
+              </RoleGuard>
+            )}
+          </Tab.Screen>
+        </>
+      )}
+
+      {role === 'driver' && (
+        <Tab.Screen name="Fill Form">
+          {() => (
+            <RoleGuard allowedRoles={['driver']}>
+              <DriverFormScreen />
+            </RoleGuard>
+          )}
+        </Tab.Screen>
+      )}
     </Tab.Navigator>
   );
 };
@@ -63,7 +110,7 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="MainTabs" component={BottomTabs} options={{ title: 'Home' }} />
       <Drawer.Screen
         name="Logout"
-        component={BottomTabs} // Not navigating to any screen
+        component={BottomTabs}
         options={{
           title: 'Logout',
           drawerIcon: ({ color, size }) => (
@@ -83,19 +130,11 @@ const DrawerNavigator = () => {
 
 export default function StackLayout() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      {/* Authentication Screens */}
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={RegisterScreen} />
-
-      {/* Main App with Drawer Navigator */}
       <Stack.Screen name="Drawer" component={DrawerNavigator} />
-
-      {/* Game Level Screens */}
+      <Stack.Screen name="VehicleTracking" component={VehicleTrackingScreen} />
     </Stack.Navigator>
   );
 }

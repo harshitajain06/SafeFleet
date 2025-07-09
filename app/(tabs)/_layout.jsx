@@ -68,13 +68,13 @@ const BottomTabs = () => {
               </RoleGuard>
             )}
           </Tab.Screen>
-          <Tab.Screen name="Track Vehicles">
+          {/* <Tab.Screen name="Track Vehicles">
             {() => (
               <RoleGuard allowedRoles={['admin']}>
                 <VehicleTrackingScreen />
               </RoleGuard>
             )}
-          </Tab.Screen>
+          </Tab.Screen> */}
         </>
       )}
 
@@ -134,7 +134,7 @@ export default function StackLayout() {
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Drawer" component={DrawerNavigator} />
-      <Stack.Screen name="VehicleTracking" component={VehicleTrackingScreen} />
+      <Stack.Screen name="VehicleTrackingScreen" component={VehicleTrackingScreen} />
     </Stack.Navigator>
   );
 }

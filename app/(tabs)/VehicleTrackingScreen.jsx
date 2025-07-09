@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { useRoute } from '@react-navigation/native';
 
-const GOOGLE_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; // 🔐 Replace this
-
-export default function VehicleTrackingScreen({ route }) {
+export default function VehicleTrackingScreen() {
+   const route = useRoute();
   const { vehicle } = route.params;
+
   const [liveVehicle, setLiveVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [address, setAddress] = useState('Fetching address...');
@@ -23,11 +24,13 @@ export default function VehicleTrackingScreen({ route }) {
         if (data.currentLocation?.lat && data.currentLocation?.lng) {
           try {
             const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${data.currentLocation.lat},${data.currentLocation.lng}&key=${GOOGLE_API_KEY}`
+              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${data.currentLocation.lat}&lon=${data.currentLocation.lng}`
             );
+
             const geoData = await response.json();
-            if (geoData.status === 'OK' && geoData.results.length > 0) {
-              setAddress(geoData.results[0].formatted_address);
+
+            if (geoData && geoData.display_name) {
+              setAddress(geoData.display_name);
             } else {
               setAddress('Address not found');
             }

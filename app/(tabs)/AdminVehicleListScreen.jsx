@@ -24,7 +24,7 @@ export default function AdminVehicleListScreen() {
       renderItem={({ item }) => (
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate('VehicleTracking', { vehicle: item })}
+          onPress={() => navigation.navigate('VehicleTrackingScreen', { vehicle: item })}
         >
           <Text style={styles.name}>{item.name}</Text>
           <Text>{item.vehicleNumber}</Text>

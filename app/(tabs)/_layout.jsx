@@ -57,7 +57,7 @@ const BottomTabs = () => {
       })}
     >
       <Tab.Screen name="Home" component={HomePage} />
-      <Tab.Screen name="Information" component={InformationPage} />
+      {/* <Tab.Screen name="Information" component={InformationPage} /> */}
 
       {role === 'admin' && (
         <>

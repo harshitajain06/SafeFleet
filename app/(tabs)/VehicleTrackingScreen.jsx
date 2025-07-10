@@ -30,8 +30,15 @@ export default function VehicleTrackingScreen() {
         if (data.currentLocation?.lat && data.currentLocation?.lng) {
           try {
             const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${data.currentLocation.lat}&lon=${data.currentLocation.lng}`
-            );
+  `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${data.currentLocation.lat}&lon=${data.currentLocation.lng}`,
+  {
+    headers: {
+      'User-Agent': 'SafeFleet/1.0 (jainharshita0604@gmail.com)', // <- REQUIRED
+      'Accept-Language': 'en',
+    },
+  }
+);
+
 
             const geoData = await response.json();
 
@@ -116,6 +123,7 @@ export default function VehicleTrackingScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 50,
     padding: 20,
     backgroundColor: '#e8f0fe',
     flexGrow: 1,

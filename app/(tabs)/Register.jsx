@@ -26,7 +26,7 @@ const RegisterScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
+  const [role, setRole] = useState('driver');
   const [isFocused, setIsFocused] = useState(null);
 
   useEffect(() => {
